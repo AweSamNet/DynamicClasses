@@ -10,3 +10,5 @@ For in-depth usage, see my article on [CodeProject.com](http://www.codeproject.c
 ## License
 
 See license details [here](https://github.com/AweSamNet/DynamicClasses/blob/master/LICENSE).
+
+(https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)
