@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="...">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Dynamic Property</Title>
+      <Shortcut>dynamicProperty</Shortcut>
+      <Description>Code snippet dynamic property setup</Description>
+      <Author>Sam Lombardo</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>Name</ID>
+          <ToolTip>Property Name</ToolTip>
+          <Default>Name</Default>
+        </Literal>
+        <Literal>
+          <ID>Type</ID>
+          <ToolTip>Property Type</ToolTip>
+          <Default>int?</Default>
+        </Literal>
+        <Literal>
+          <ID>ColumnName</ID>
+          <ToolTip>DataTable Column Name</ToolTip>
+          <Default>col_name</Default>
+        </Literal>
+        <Literal>
+          <ID>SqlDbType</ID>
+          <ToolTip>DB Data Type</ToolTip>
+          <Default>.Int</Default>
+        </Literal>
+
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[#region $Name$
+		private $Type$ _$Name$;
+
+		[DynamicProperty(ColumnName="$ColumnName$", DatabaseType=SqlDbType$SqlDbType$)]
+		public $Type$ $Name$
+		{
+			get 
+			{
+				return _$Name$; 
+			}
+			set
+			{
+				#region Optional Additional Code Here
+
+				_$Name$ = value;
+				
+				#endregion
+
+				Is$Name$Set = true;
+			}
+		}
+		public bool Is$Name$Set { get; protected set; }
+		#endregion
+   $end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
+
+
+
+

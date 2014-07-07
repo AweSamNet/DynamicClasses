@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="...">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Dynamic Class</Title>
+      <Shortcut>dynamicClass</Shortcut>
+      <Description>Code snippet dynamic class setup</Description>
+      <Author>Sam Lombardo</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>Name</ID>
+          <ToolTip>Property Name</ToolTip>
+          <Default>Name</Default>
+        </Literal>
+        <Literal>
+          <ID>Type</ID>
+          <ToolTip>Property Type</ToolTip>
+          <Default>BusinessLogicBase</Default>
+        </Literal>
+		<Literal>
+		  <ID>IDFieldName</ID>
+		  <ToolTip>ID Property Name</ToolTip>
+		  <Default>ObjectID</Default>
+		</Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[#region $Name$
+		private $Type$ _$Name$;
+
+		[ScriptIgnore]
+		[DynamicClass(typeof($Type$), "$IDFieldName$")]
+		public $Type$ $Name$
+		{
+			get
+			{
+				return _$Name$;
+			}
+			private set
+			{
+				_$Name$ = value; // Set cached variable to the value
+				if (value == null) // If it's null set the identifier to null
+					this.$IDFieldName$ = null;
+				else // Otherwise set the identifier to the value's ID
+					this.$IDFieldName$ = value.ID;
+			}
+		}
+		#endregion
+   $end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
+
+
+
+

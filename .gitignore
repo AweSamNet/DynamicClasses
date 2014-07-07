@@ -1,0 +1,5 @@
+*.suo
+bin
+obj
+AweSamNet.Data.DynamicClasses.csproj.user
+*.vspscc
