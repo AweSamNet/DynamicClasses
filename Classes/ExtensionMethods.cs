@@ -27,7 +27,6 @@ namespace AweSamNet.Data.DynamicClasses
     /// </summary>
     /// <param name="propertyName">Name of the property to pull attributes from.</param>
     /// <returns>An array of DynamicClass of a given property.</returns>
-
     {
         /// <summary>
         /// Returns an array of attributes of type T on a given property.
@@ -37,7 +36,7 @@ namespace AweSamNet.Data.DynamicClasses
         /// <param name="propertyName">Name of the property to pull attributes from.</param>
         /// <returns>An array of attributes of type T on a given property.</returns>
         /// <exception cref="PropertyNotFoundException: Thrown if propertyName does not exist." ></exception>
-        public static T[] GetPropertyAttributes<T>(this object source,  String propertyName) where T : Attribute
+        public static T[] GetPropertyAttributes<T>(this object source, String propertyName) where T : Attribute
         {
             T[] returnValue = new T[0];
             Type type = source.GetType();
@@ -63,7 +62,7 @@ namespace AweSamNet.Data.DynamicClasses
                     returnValue[i] = attrs[i] as T;
                 }
             }
-        
+
             return returnValue;
         }
 

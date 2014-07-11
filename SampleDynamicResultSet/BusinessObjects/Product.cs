@@ -101,7 +101,7 @@ namespace SampleDynamicResultSet.BusinessObjects
         #region Supplier
         private Supplier _Supplier;
 
-		[DynamicClass(typeof(Supplier), "SupplierID")]
+        [DynamicClass(typeof(Supplier), "SupplierID")]
         public Supplier Supplier
         {
             get
@@ -125,32 +125,32 @@ namespace SampleDynamicResultSet.BusinessObjects
         public bool IsSupplierSet { get; set; }
         #endregion
 
-		#region SupplierID
-		private int? _SupplierID;
+        #region SupplierID
+        private int? _SupplierID;
 
-		[DynamicProperty(ColumnName = "prod_SupplierId", DatabaseType = SqlDbType.Int)]
-		public int? SupplierID
-		{
-			get
-			{
-				if (!IsSupplierIDSet)
-					throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
+        [DynamicProperty(ColumnName = "prod_SupplierId", DatabaseType = SqlDbType.Int)]
+        public int? SupplierID
+        {
+            get
+            {
+                if (!IsSupplierIDSet)
+                    throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
 
-				return _SupplierID;
-			}
-			set
-			{
-				#region Optional Additional Code Here
+                return _SupplierID;
+            }
+            set
+            {
+                #region Optional Additional Code Here
 
-				_SupplierID = value;
+                _SupplierID = value;
 
-				#endregion
+                #endregion
 
-				IsSupplierIDSet = true;
-			}
-		}
-		public bool IsSupplierIDSet { get; set; }
-		#endregion
+                IsSupplierIDSet = true;
+            }
+        }
+        public bool IsSupplierIDSet { get; set; }
+        #endregion
 
 
         #endregion
@@ -161,14 +161,14 @@ namespace SampleDynamicResultSet.BusinessObjects
             return this.Name;
         }
 
-		public override bool IsEmpty()
-		{
-			return !this.IsNameSet || String.IsNullOrWhiteSpace(this.Name);
-		}
+        public override bool IsEmpty()
+        {
+            return !this.IsNameSet || String.IsNullOrWhiteSpace(this.Name);
+        }
 
-		public override void OnLoaded()
-		{
-		}
+        public override void OnLoaded()
+        {
+        }
         #endregion
     }
 }

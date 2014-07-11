@@ -7,39 +7,39 @@ using System.Linq;
 
 namespace AweSamNet.Data.DynamicClasses
 {
-	/// <summary>
-	/// Manipulates data in a DataTable and returns a new List where T : <see cref="BusinessLogicBase"/>  
-	/// </summary>
-	[Serializable]
-	public partial class DynamicResultSet
-	{
+    /// <summary>
+    /// Manipulates data in a DataTable and returns a new List where T : <see cref="BusinessLogicBase"/>  
+    /// </summary>
+    [Serializable]
+    public partial class DynamicResultSet
+    {
         private static int _maxLevelCounter = 3; //set this to limit the level of child objects
         private static Dictionary<Type, List<PropertyInfo>> _cachedProperties = new Dictionary<Type, List<PropertyInfo>>();
         private static Dictionary<String, List<object>> _cachedDynamicPropertyAttributes = new Dictionary<String, List<object>>();
         private static Dictionary<String, List<object>> _cachedDynamicClassAttributes = new Dictionary<String, List<object>>();
         private static Dictionary<Type, MethodInfo> _cachedGenericMethods = new Dictionary<Type, MethodInfo>();
 
-		#region Properties
+        #region Properties
 
-		private DataTable _data = new DataTable();
-		private DataTable Data
-		{
-			get 
-			{
-				if (_data == null)
-					_data = new DataTable();
-				return _data; 
-			}
-			set { _data = value; }
-		}
-		
-		#endregion
+        private DataTable _data = new DataTable();
+        private DataTable Data
+        {
+            get
+            {
+                if (_data == null)
+                    _data = new DataTable();
+                return _data;
+            }
+            set { _data = value; }
+        }
+
+        #endregion
 
         #region Contructors
         public DynamicResultSet(DataTable data)
-		{
-			this.Data = data;
-		}
+        {
+            this.Data = data;
+        }
 
         #endregion
 
@@ -51,54 +51,54 @@ namespace AweSamNet.Data.DynamicClasses
         /// <typeparam name="T">Type of list to return.  
         /// This type must inherit <see cref="Utilities.DynamicClasses.BusinessLogicBase"/></typeparam>
         /// <returns>List of type T constructed from the stored DataTable.</returns>
-        public List<T> GetList<T>() 
-			where T : BusinessLogicBase, new()
-		{
-			List<T> list = new List<T>();
-			if (this.Data == null)
-				return list;
+        public List<T> GetList<T>()
+            where T : BusinessLogicBase, new()
+        {
+            List<T> list = new List<T>();
+            if (this.Data == null)
+                return list;
 
-			foreach (DataRow row in this.Data.Rows)
-			{
+            foreach (DataRow row in this.Data.Rows)
+            {
                 T newObject = RowToType<T>(row);
 
-                if(newObject != null)
-				    list.Add(newObject);
+                if (newObject != null)
+                    list.Add(newObject);
 
-			}
+            }
 
-			return list;
-		}
+            return list;
+        }
 
-		public static T RowToType<T>(DataRow row) where T : BusinessLogicBase, new()
-		{
-			T nullObject = null;
-			return RowToType<T>(row, nullObject);
-		}
+        public static T RowToType<T>(DataRow row) where T : BusinessLogicBase, new()
+        {
+            T nullObject = null;
+            return RowToType<T>(row, nullObject);
+        }
 
         public static T RowToType<T>(DataRow row, T existingObject) where T : BusinessLogicBase, new()
-		{
-			return RowToType<T>(row, 0, existingObject);
-		}
-		private static T RowToType<T>(DataRow row, int _currentLevelCursor, T returnObject) where T : BusinessLogicBase, new()
+        {
+            return RowToType<T>(row, 0, existingObject);
+        }
+        private static T RowToType<T>(DataRow row, int _currentLevelCursor, T returnObject) where T : BusinessLogicBase, new()
         {
             Type type = typeof(T);
             List<PropertyInfo> properties;
-            
+
             //get cached properties otherwise cache them if they aren't cached.
-            if(!_cachedProperties.TryGetValue(type, out properties))
+            if (!_cachedProperties.TryGetValue(type, out properties))
             {
                 properties = type.GetProperties().ToList();
                 _cachedProperties[type] = properties;
             }
 
-			if(returnObject == null)
-				returnObject = new T();
-  
+            if (returnObject == null)
+                returnObject = new T();
+
             foreach (PropertyInfo property in properties)
             {
                 string path = type.Namespace + "." + type.Name + "." + property.Name;
-                
+
                 #region Do DynamicPropery's
                 List<object> attrs = null;
                 try
@@ -119,11 +119,11 @@ namespace AweSamNet.Data.DynamicClasses
                 if (attrs != null && attrs.Any())
                 {
                     DynamicProperty attr = attrs[0] as DynamicProperty;
-                    if (attr != null && row.Table!= null && row.Table.Columns.Contains(attr.ColumnName))
+                    if (attr != null && row.Table != null && row.Table.Columns.Contains(attr.ColumnName))
                     {
                         SetPropertyValue<T>(returnObject, row, property, attr);
 
-						continue; //skip to the next property.  A property can't be both a SQLDBType and a dynamic class
+                        continue; //skip to the next property.  A property can't be both a SQLDBType and a dynamic class
                     }
                 }
                 #endregion
@@ -165,25 +165,25 @@ namespace AweSamNet.Data.DynamicClasses
                         }
 
                         object newChildObject = genericMethod.Invoke(null, new object[] { row, _currentLevelCursor + 1, null });
-						if(newChildObject != null && !(newChildObject as BusinessLogicBase).IsEmpty())
-							property.SetValue(returnObject, newChildObject, null);
+                        if (newChildObject != null && !(newChildObject as BusinessLogicBase).IsEmpty())
+                            property.SetValue(returnObject, newChildObject, null);
                     }
                 }
                 #endregion
 
             }
-			if (returnObject != null && !returnObject.IsEmpty())
-			{
-				returnObject.OnLoaded();
-				return returnObject;
-			}
-			else
-				return null;
+            if (returnObject != null && !returnObject.IsEmpty())
+            {
+                returnObject.OnLoaded();
+                return returnObject;
+            }
+            else
+                return null;
         }
 
-		private static void SetPropertyValue<T>(T newObject, DataRow row, PropertyInfo property, DynamicProperty attr) where T : BusinessLogicBase, new()
-		{
-			object value = row[attr.ColumnName];
+        private static void SetPropertyValue<T>(T newObject, DataRow row, PropertyInfo property, DynamicProperty attr) where T : BusinessLogicBase, new()
+        {
+            object value = row[attr.ColumnName];
             if (System.DBNull.Value.Equals(value))
             {
                 value = null;
@@ -237,8 +237,8 @@ namespace AweSamNet.Data.DynamicClasses
                     case SqlDbType.Real: value = Convert.ToSingle(value);
                         break;
                     case SqlDbType.UniqueIdentifier:
-						Guid guid = new Guid(value.ToString());
-						value = guid;
+                        Guid guid = new Guid(value.ToString());
+                        value = guid;
 
                         break;
                     case SqlDbType.SmallInt: value = Convert.ToInt16(value);
@@ -261,7 +261,7 @@ namespace AweSamNet.Data.DynamicClasses
                 }
                 #endregion
             }
-			property.SetValue(newObject, value, null) ;
+            property.SetValue(newObject, value, null);
         }
 
         #endregion

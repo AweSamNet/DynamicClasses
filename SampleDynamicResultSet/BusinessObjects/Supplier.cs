@@ -7,97 +7,97 @@ using AweSamNet.Data.DynamicClasses;
 
 namespace SampleDynamicResultSet.BusinessObjects
 {
-	public class Supplier : BusinessLogicBase
-	{
-		#region Properties
-		//==========================================================
+    public class Supplier : BusinessLogicBase
+    {
+        #region Properties
+        //==========================================================
 
-		#region Name
+        #region Name
 
-		private String _name;
+        private String _name;
 
-		[DynamicProperty(ColumnName="sup_CompanyName", DatabaseType=SqlDbType.NVarChar)]
-		public String Name
-		{
-			get 
-			{
-				if (!IsNameSet)
-					throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
+        [DynamicProperty(ColumnName = "sup_CompanyName", DatabaseType = SqlDbType.NVarChar)]
+        public String Name
+        {
+            get
+            {
+                if (!IsNameSet)
+                    throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
 
-				return _name; 
-			}
-			set
-			{
-				#region Optional Additional Code Here
+                return _name;
+            }
+            set
+            {
+                #region Optional Additional Code Here
 
-				_name = value;
-				
-				#endregion
+                _name = value;
 
-				IsNameSet = true;
-			}
-		}
-		public bool IsNameSet { get; set; }
+                #endregion
 
-		#endregion
+                IsNameSet = true;
+            }
+        }
+        public bool IsNameSet { get; set; }
 
-		//==========================================================
+        #endregion
 
-		#region NumberOfEmployees
+        //==========================================================
 
-		private int? _numberOfEmployees;
-		[DynamicProperty(ColumnName="sup_TotalEmployees", DatabaseType=SqlDbType.Int)]
-		public int? NumberOfEmployees
-		{
-			get
-			{
-				if (!IsNumberOfEmployeesSet)
-					throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
+        #region NumberOfEmployees
 
-				return _numberOfEmployees;
-			}
-			set
-			{
-				#region Optional Additional Code Here
+        private int? _numberOfEmployees;
+        [DynamicProperty(ColumnName = "sup_TotalEmployees", DatabaseType = SqlDbType.Int)]
+        public int? NumberOfEmployees
+        {
+            get
+            {
+                if (!IsNumberOfEmployeesSet)
+                    throw new Exception(CST_PROPERTY_VALUE_NOT_RETURNED);
 
-				_numberOfEmployees = value;
+                return _numberOfEmployees;
+            }
+            set
+            {
+                #region Optional Additional Code Here
 
-				#endregion
+                _numberOfEmployees = value;
 
-				IsNumberOfEmployeesSet = true;
-			}
-		}
-		public bool IsNumberOfEmployeesSet { get; set; }
-		
-		#endregion
+                #endregion
 
-		//==========================================================
+                IsNumberOfEmployeesSet = true;
+            }
+        }
+        public bool IsNumberOfEmployeesSet { get; set; }
 
-		public double notDataboundProperty { get; set; }
+        #endregion
+
+        //==========================================================
+
+        public double notDataboundProperty { get; set; }
 
 
 
-		#endregion
+        #endregion
 
-		#region Overrides
+        #region Overrides
 
-		public override string ToString()
-		{
-			//what to show on ToString().  May differ from class to class.
-			return this.Name;
-		}
+        public override string ToString()
+        {
+            //what to show on ToString().  May differ from class to class.
+            return this.Name;
+        }
 
-		public override bool IsEmpty()
-		{
-			return !this.IsNameSet || String.IsNullOrWhiteSpace(this.Name);
-		}
+        public override bool IsEmpty()
+        {
+            return !this.IsNameSet || String.IsNullOrWhiteSpace(this.Name);
+        }
 
-		public override void OnLoaded()
-		{
-		}
-		#endregion
+        public override void OnLoaded()
+        {
+        }
+        #endregion
 
-		//==========================================================
+        //==========================================================
 
         #region Markup
         private decimal _Markup;
@@ -125,6 +125,6 @@ namespace SampleDynamicResultSet.BusinessObjects
         }
         public bool IsMarkupSet { get; set; }
         #endregion
-        
-	}
+
+    }
 }
