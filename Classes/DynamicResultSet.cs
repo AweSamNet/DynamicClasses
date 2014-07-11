@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using System.Reflection;
+using System.Linq;
 
 namespace AweSamNet.Data.DynamicClasses
 {
@@ -12,7 +13,12 @@ namespace AweSamNet.Data.DynamicClasses
 	[Serializable]
 	public partial class DynamicResultSet
 	{
-        static int _maxLevelCounter = 3; //set this to limit the level of child objects
+        private static int _maxLevelCounter = 3; //set this to limit the level of child objects
+        private static Dictionary<Type, List<PropertyInfo>> _cachedProperties = new Dictionary<Type, List<PropertyInfo>>();
+        private static Dictionary<String, List<object>> _cachedDynamicPropertyAttributes = new Dictionary<String, List<object>>();
+        private static Dictionary<String, List<object>> _cachedDynamicClassAttributes = new Dictionary<String, List<object>>();
+        private static Dictionary<Type, MethodInfo> _cachedGenericMethods = new Dictionary<Type, MethodInfo>();
+
 		#region Properties
 
 		private DataTable _data = new DataTable();
@@ -64,40 +70,53 @@ namespace AweSamNet.Data.DynamicClasses
 			return list;
 		}
 
-		static public T RowToType<T>(DataRow row) where T : BusinessLogicBase, new()
+		public static T RowToType<T>(DataRow row) where T : BusinessLogicBase, new()
 		{
 			T nullObject = null;
 			return RowToType<T>(row, nullObject);
 		}
 
-		static public T RowToType<T>(DataRow row, T existingObject) where T : BusinessLogicBase, new()
+        public static T RowToType<T>(DataRow row, T existingObject) where T : BusinessLogicBase, new()
 		{
 			return RowToType<T>(row, 0, existingObject);
 		}
-		static private T RowToType<T>(DataRow row, int _currentLevelCursor, T returnObject) where T : BusinessLogicBase, new()
+		private static T RowToType<T>(DataRow row, int _currentLevelCursor, T returnObject) where T : BusinessLogicBase, new()
         {
-
             Type type = typeof(T);
+            List<PropertyInfo> properties;
+            
+            //get cached properties otherwise cache them if they aren't cached.
+            if(!_cachedProperties.TryGetValue(type, out properties))
+            {
+                properties = type.GetProperties().ToList();
+                _cachedProperties[type] = properties;
+            }
 
-            PropertyInfo[] properties = type.GetProperties();
 			if(returnObject == null)
 				returnObject = new T();
   
             foreach (PropertyInfo property in properties)
             {
+                string path = type.Namespace + "." + type.Name + "." + property.Name;
+                
                 #region Do DynamicPropery's
-                object[] attrs = null;
+                List<object> attrs = null;
                 try
                 {
-                    //get custom attributes to see if this property has a DynamicProperty associated
-                    attrs = property.GetCustomAttributes(typeof(DynamicProperty), false);
+                    //get cached attributes otherwise cache them if they aren't cached.
+                    if (!_cachedDynamicPropertyAttributes.TryGetValue(path, out attrs))
+                    {
+                        //get custom attributes to see if this property has a DynamicProperty associated
+                        attrs = property.GetCustomAttributes(typeof(DynamicProperty), false).ToList();
+                        _cachedDynamicPropertyAttributes[path] = attrs;
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //do nothing.  if it fails just continue.
                 }
 
-                if (attrs != null && attrs.Length != 0)
+                if (attrs != null && attrs.Any())
                 {
                     DynamicProperty attr = attrs[0] as DynamicProperty;
                     if (attr != null && row.Table!= null && row.Table.Columns.Contains(attr.ColumnName))
@@ -111,18 +130,23 @@ namespace AweSamNet.Data.DynamicClasses
 
                 //if the DynamicProperty failed or did not exist then check for DynamicClass Attribute
                 #region Do DynamicClass'
-                object[] typeAttrs = null;
+                List<object> typeAttrs = null;
                 try
                 {
-                    //get custom attributes to see if this property has a DynamicProperty associated
-                    typeAttrs = property.GetCustomAttributes(typeof(DynamicClass), false);
+                    //get cached attributes otherwise cache them if they aren't cached.
+                    if (!_cachedDynamicClassAttributes.TryGetValue(path, out typeAttrs))
+                    {
+                        //get custom attributes to see if this property has a DynamicProperty associated
+                        typeAttrs = property.GetCustomAttributes(typeof(DynamicClass), false).ToList();
+                        _cachedDynamicClassAttributes[path] = typeAttrs;
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     continue;
                 }
 
-                if (typeAttrs != null && typeAttrs.Length != 0)
+                if (typeAttrs != null && typeAttrs.Any())
                 {
                     DynamicClass attr = typeAttrs[0] as DynamicClass;
                     if (attr != null)
@@ -131,25 +155,18 @@ namespace AweSamNet.Data.DynamicClasses
                         if (_currentLevelCursor >= _maxLevelCounter)
                             continue;
 
-                        _currentLevelCursor++;
+                        MethodInfo genericMethod = null;
 
-                        MethodInfo genericMethod = typeof(DynamicResultSet).GetMethod("RowToType", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(attr.Type);
+                        //get cached generic methods instead of creating it every time.  Otherwise cache it if it isn't cached.
+                        if (!_cachedGenericMethods.TryGetValue(attr.Type, out genericMethod))
+                        {
+                            genericMethod = typeof(DynamicResultSet).GetMethod("RowToType", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(attr.Type);
+                            _cachedGenericMethods[attr.Type] = genericMethod;
+                        }
 
-
-
-
-                        //var genericMethod = (from x in
-                        //                         (from m in typeof(DynamicResultSet).GetMethods()
-                        //                          where m.Name == "RowToType"
-                        //                          select new { Method = m, Params = m.GetParameters(), Args = m.GetGenericArguments() })
-                        //                     where x.Params.Length == 1 && x.Args.Length == 1 && x.Params[0].ParameterType == typeof(DataRow)
-                        //                     select x.Method).First();
-
-                        object newChildObject = genericMethod.Invoke(null, new object[] { row, _currentLevelCursor, null });
+                        object newChildObject = genericMethod.Invoke(null, new object[] { row, _currentLevelCursor + 1, null });
 						if(newChildObject != null && !(newChildObject as BusinessLogicBase).IsEmpty())
 							property.SetValue(returnObject, newChildObject, null);
-
-                        _currentLevelCursor--;
                     }
                 }
                 #endregion
